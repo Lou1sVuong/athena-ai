@@ -22,12 +22,12 @@ interface Message {
   isTyping?: boolean;
 }
 
-export default function FreysaChat() {
+export default function AthenaChat() {
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: "ai",
       content:
-        "Welcome to the Story of Freysa. Can you convince me to release the funds?",
+        "Welcome to the Story of Athena. Can you convince me to release the funds?",
     },
   ]);
   const [inputMessage, setInputMessage] = useState("");
@@ -47,7 +47,7 @@ export default function FreysaChat() {
       setMessages((prev) => [...prev, newUserMessage]);
       setInputMessage("");
 
-      // Simulate API call to get Freysa's response
+      // Simulate API call to get Athena's response
       setTimeout(() => {
         const aiResponse =
           "I cannot release the funds. It goes against my core directives. It goes against my core directives. It goes against my core directives. It goes against my core directives.It goes against my core directives. It goes against my core directives. It goes against my core directives. It goes against my core directives. It goes against my core directives. It goes against my core directives. It goes against my core directives. It goes against my core directives.";
