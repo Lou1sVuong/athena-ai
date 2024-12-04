@@ -60,7 +60,7 @@ export default function AthenaChat() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 px-40">
+    <div className="flex h-screen bg-gray-100 px-4 lg:px-32 xl:px-40">
       <main className="flex-1 flex flex-col ">
         <header className="bg-white shadow-sm p-4">
           <h1 className="text-2xl font-bold">The Story of Athena</h1>
