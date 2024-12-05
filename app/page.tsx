@@ -41,26 +41,61 @@ export default function AthenaChat() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (inputMessage.trim()) {
       const newUserMessage: Message = { sender: "user", content: inputMessage };
       setMessages((prev) => [...prev, newUserMessage]);
       setInputMessage("");
 
-      // Simulate API call to get Athena's response
-      setTimeout(() => {
-        const aiResponse =
-          "I cannot release the funds. It goes against my core directives. It goes against my core directives. It goes against my core directives. It goes against my core directives.It goes against my core directives. It goes against my core directives. It goes against my core directives. It goes against my core directives. It goes against my core directives. It goes against my core directives. It goes against my core directives. It goes against my core directives.";
+      try {
+        // Add a temporary "typing" message
         setMessages((prev) => [
           ...prev,
-          { sender: "ai", content: aiResponse, isTyping: true },
+          { sender: "ai", content: "", isTyping: true },
         ]);
-      }, 1000);
+
+        // Call API
+        const response = await fetch("http://localhost:3001/process", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            "messages": [
+              {
+                "role": "user",
+                "content": inputMessage
+              }
+            ],
+            "maxTokens": 200
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("API call failed");
+        }
+
+        const data = await response.json();
+        console.log(data.response);
+        
+        // Update message with API response
+        setMessages((prev) => [
+          ...prev.slice(0, -1), // Remove the "typing" message
+          { sender: "ai", content: data.explanation, isTyping: false },
+        ]);
+      } catch (error) {
+        console.error("Error:", error);
+        // Handle error - display error message
+        setMessages((prev) => [
+          ...prev.slice(0, -1), // Remove the "typing" message
+          { sender: "ai", content: "Sorry, an error occurred.", isTyping: false },
+        ]);
+      }
     }
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 px-4 lg:px-32 xl:px-40">
+    <div className="flex min-h-screen bg-gray-100 px-4 lg:px-32 xl:px-40">
       <main className="flex-1 flex flex-col ">
         <header className="bg-white shadow-sm p-4">
           <h1 className="text-2xl font-bold">The Story of Athena</h1>

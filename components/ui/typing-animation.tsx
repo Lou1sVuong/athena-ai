@@ -4,35 +4,27 @@ interface TypingAnimationProps {
   text: string;
   duration?: number;
   className?: string;
-  onComplete?: () => void;
 }
 
-export default function TypingAnimation({
-  text,
-  duration = 200,
-  className,
-  onComplete,
-}: TypingAnimationProps) {
-  const [displayedText, setDisplayedText] = useState("");
+export default function TypingAnimation({ text = '', duration = 30, className }: TypingAnimationProps) {
+  const [displayedText, setDisplayedText] = useState('');
   const [i, setI] = useState(0);
 
   useEffect(() => {
+    setDisplayedText('');
+    setI(0);
+
     const typingEffect = setInterval(() => {
-      if (i < text.length) {
+      if (text && i < text.length) {
         setDisplayedText(text.substring(0, i + 1));
         setI(i + 1);
       } else {
         clearInterval(typingEffect);
-        if (onComplete) onComplete();
       }
     }, duration);
 
-    return () => {
-      clearInterval(typingEffect);
-    };
-  }, [duration, i, text, onComplete]);
+    return () => clearInterval(typingEffect);
+  }, [text, i, duration]);
 
-  return (
-    <span className={className}>{displayedText ? displayedText : text}</span>
-  );
+  return <span className={className}>{displayedText}</span>;
 }
