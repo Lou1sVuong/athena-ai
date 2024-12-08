@@ -156,6 +156,7 @@ export default function AthenaChat() {
           <CardFooter>
             <div className="flex w-full items-center space-x-2 px-4">
               <Input
+                disabled={isPending || isConfirming}
                 type="text"
                 placeholder="Type your message..."
                 value={inputMessage}
