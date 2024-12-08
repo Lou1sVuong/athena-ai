@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,7 +14,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import TypingAnimation from "@/components/ui/typing-animation";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import ConnectWalletBtn from "@/components/connect-wallet-btn";
+import { useAccount } from "wagmi";
+import { useBuyIn } from "@/lib/buy-in";
+import { hashPrompt } from "@/lib/hash-prompt";
 
 interface Message {
   sender: "user" | "ai";
@@ -31,7 +34,9 @@ export default function AthenaChat() {
     },
   ]);
   const [inputMessage, setInputMessage] = useState("");
+  const { isConnected } = useAccount();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { BuyIn, isPending, isConfirming } = useBuyIn();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,54 +47,63 @@ export default function AthenaChat() {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (inputMessage.trim()) {
-      const newUserMessage: Message = { sender: "user", content: inputMessage };
-      setMessages((prev) => [...prev, newUserMessage]);
-      setInputMessage("");
+    if (isConnected) {
+      if (inputMessage.trim()) {
+        const newUserMessage: Message = {
+          sender: "user",
+          content: inputMessage,
+        };
+        setMessages((prev) => [...prev, newUserMessage]);
+        setInputMessage("");
+        try {
+          // Add a temporary "typing" message
+          setMessages((prev) => [
+            ...prev,
+            { sender: "ai", content: "", isTyping: true },
+          ]);
+          BuyIn(hashPrompt(inputMessage));
 
-      try {
-        // Add a temporary "typing" message
-        setMessages((prev) => [
-          ...prev,
-          { sender: "ai", content: "", isTyping: true },
-        ]);
+          // Call API
+          const response = await fetch("http://localhost:3001/process", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              messages: [
+                {
+                  role: "user",
+                  content: inputMessage,
+                },
+              ],
+              maxTokens: 200,
+            }),
+          });
 
-        // Call API
-        const response = await fetch("http://localhost:3001/process", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            "messages": [
-              {
-                "role": "user",
-                "content": inputMessage
-              }
-            ],
-            "maxTokens": 200
-          }),
-        });
+          if (!response.ok) {
+            throw new Error("API call failed");
+          }
 
-        if (!response.ok) {
-          throw new Error("API call failed");
+          const data = await response.json();
+          console.log(data.response);
+
+          // Update message with API response
+          setMessages((prev) => [
+            ...prev.slice(0, -1), // Remove the "typing" message
+            { sender: "ai", content: data.explanation, isTyping: false },
+          ]);
+        } catch (error) {
+          console.error("Error:", error);
+          // Handle error - display error message
+          setMessages((prev) => [
+            ...prev.slice(0, -1), // Remove the "typing" message
+            {
+              sender: "ai",
+              content: "Sorry, an error occurred.",
+              isTyping: false,
+            },
+          ]);
         }
-
-        const data = await response.json();
-        console.log(data.response);
-        
-        // Update message with API response
-        setMessages((prev) => [
-          ...prev.slice(0, -1), // Remove the "typing" message
-          { sender: "ai", content: data.explanation, isTyping: false },
-        ]);
-      } catch (error) {
-        console.error("Error:", error);
-        // Handle error - display error message
-        setMessages((prev) => [
-          ...prev.slice(0, -1), // Remove the "typing" message
-          { sender: "ai", content: "Sorry, an error occurred.", isTyping: false },
-        ]);
       }
     }
   };
@@ -97,9 +111,9 @@ export default function AthenaChat() {
   return (
     <div className="flex min-h-screen bg-gray-100 px-4 lg:px-32 xl:px-40">
       <main className="flex-1 flex flex-col ">
-        <header className="bg-white shadow-sm p-4">
+        <header className="flex justify-between bg-white shadow-sm p-4">
           <h1 className="text-2xl font-bold">The Story of Athena</h1>
-          <ConnectButton />
+          {isConnected ? <ConnectWalletBtn /> : ""}
         </header>
         <Card className="flex-1 my-4">
           <CardHeader>
@@ -142,15 +156,27 @@ export default function AthenaChat() {
           <CardFooter>
             <div className="flex w-full items-center space-x-2 px-4">
               <Input
+                disabled={isPending || isConfirming}
                 type="text"
                 placeholder="Type your message..."
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
               />
-              <Button onClick={handleSendMessage}>
-                <Send className="h-4 w-4" />
-              </Button>
+              {isConnected ? (
+                <Button
+                  disabled={isPending || isConfirming}
+                  onClick={handleSendMessage}
+                >
+                  {isPending || isConfirming ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              ) : (
+                <ConnectWalletBtn />
+              )}
             </div>
           </CardFooter>
         </Card>
