@@ -8,7 +8,7 @@ import {
   darkTheme,
 } from "@rainbow-me/rainbowkit";
 import { trustWallet, ledgerWallet } from "@rainbow-me/rainbowkit/wallets";
-import { kairos, base } from "wagmi/chains";
+import { baseSepolia, kairos, base } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider, http } from "wagmi";
 
@@ -24,8 +24,9 @@ const config = getDefaultConfig({
       wallets: [trustWallet, ledgerWallet],
     },
   ],
-  chains: [base, kairos],
+  chains: [baseSepolia, base, kairos],
   transports: {
+    [baseSepolia.id]: http("https://sepolia.base.org"),
     [kairos.id]: http("https://rpc.ankr.com/klaytn_testnet"),
   },
   ssr: true,
@@ -44,7 +45,7 @@ export function WalletProviders({ children }: { children: React.ReactNode }) {
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
-          initialChain={base}
+          initialChain={baseSepolia}
           showRecentTransactions={true}
           theme={darkTheme({
             accentColor: "#ff8800",
