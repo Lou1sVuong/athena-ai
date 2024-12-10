@@ -1,12 +1,14 @@
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import BUYIN_ABI from "@/abi/buy-in.json";
 import { toast } from "@/hooks/use-toast";
+import { ethers } from "ethers";
 
-const contractAddress = "0x7a5E899E31348cd6bb9d31A0667c1C91bbd39D10";
+const contractAddress = "0x8e305cE49E7F37e287B4A958588CB2CBf1c262c2";
 
 export function useBuyIn() {
   // Set up the contract write function
   const { data: hash, error, isPending, writeContract } = useWriteContract();
+  const valueInWei = ethers.parseEther("0.01");
 
   async function BuyIn(hashedPrompt: string) {
     try {
@@ -15,6 +17,7 @@ export function useBuyIn() {
         abi: BUYIN_ABI,
         functionName: "buyIn",
         args: [hashedPrompt],
+        value: valueInWei,
       });
     } catch (error) {
       console.log(error);
