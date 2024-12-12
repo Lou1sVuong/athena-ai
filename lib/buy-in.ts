@@ -30,10 +30,9 @@ export function useBuyIn() {
 
   // Call useWaitForTransactionReceipt at the top level of the hook
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({
-      hash,
-    });
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
 
-  return { BuyIn, isPending, error, hash, isConfirming, isConfirmed };
+  return { BuyIn, isPending, error, hash, isLoading, isSuccess };
 }
