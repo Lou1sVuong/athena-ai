@@ -36,6 +36,8 @@ export default function AthenaChat() {
   const [inputMessage, setInputMessage] = useState("");
   const { isConnected } = useAccount();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  // const [prizePool, setPrizePool] = useState("0");
+
   const { BuyIn, isPending, isLoading, isSuccess } = useBuyIn();
 
   const scrollToBottom = () => {

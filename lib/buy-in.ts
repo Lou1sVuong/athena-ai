@@ -1,4 +1,8 @@
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useReadContract,
+} from "wagmi";
 import BUYIN_ABI from "@/abi/buy-in.json";
 import { toast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
@@ -28,11 +32,25 @@ export function useBuyIn() {
     }
   }
 
+  const getFeeRecipientBalance = useReadContract({
+    address: contractAddress,
+    abi: BUYIN_ABI,
+    functionName: "getFeeRecipientBalance",
+  });
+
   // Call useWaitForTransactionReceipt at the top level of the hook
 
   const { isLoading, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
 
-  return { BuyIn, isPending, error, hash, isLoading, isSuccess };
+  return {
+    BuyIn,
+    getFeeRecipientBalance,
+    isPending,
+    error,
+    hash,
+    isLoading,
+    isSuccess,
+  };
 }

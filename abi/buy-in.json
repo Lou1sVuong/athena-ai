@@ -1,103 +1,88 @@
 [
   {
+    "type": "constructor",
     "inputs": [
       {
-        "internalType": "address",
         "name": "feeRecipientAddress",
-        "type": "address"
+        "type": "address",
+        "internalType": "address"
       },
-      {
-        "internalType": "uint256",
-        "name": "feePerc_",
-        "type": "uint256"
-      }
+      { "name": "feePerc_", "type": "uint256", "internalType": "uint256" }
     ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
+    "stateMutability": "nonpayable"
   },
+  { "type": "fallback", "stateMutability": "payable" },
+  { "type": "receive", "stateMutability": "payable" },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes32",
-        "name": "hashedPrompt",
-        "type": "bytes32"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "BuyIn",
-    "type": "event"
-  },
-  {
-    "stateMutability": "payable",
-    "type": "fallback"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "hashedPrompt",
-        "type": "bytes32"
-      }
-    ],
+    "type": "function",
     "name": "buyIn",
+    "inputs": [
+      { "name": "hashedPrompt", "type": "bytes32", "internalType": "bytes32" }
+    ],
     "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
+    "stateMutability": "payable"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "feePerc_",
-        "type": "uint256"
-      }
-    ],
+    "type": "function",
+    "name": "getFeeRecipientBalance",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "setFee",
+    "inputs": [
+      { "name": "feePerc_", "type": "uint256", "internalType": "uint256" }
+    ],
     "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "stateMutability": "nonpayable"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "feeRecipientAddress",
-        "type": "address"
-      }
-    ],
+    "type": "function",
     "name": "setFeeRecipient",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "operator_",
-        "type": "address"
+        "name": "feeRecipientAddress",
+        "type": "address",
+        "internalType": "address"
       }
     ],
-    "name": "setOperator",
     "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "stateMutability": "nonpayable"
   },
   {
-    "stateMutability": "payable",
-    "type": "receive"
+    "type": "function",
+    "name": "setOperator",
+    "inputs": [
+      { "name": "operator_", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "BuyIn",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "hashedPrompt",
+        "type": "bytes32",
+        "indexed": false,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
   }
 ]
