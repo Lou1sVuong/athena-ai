@@ -101,14 +101,15 @@ export default function AthenaChat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess]);
 
+  console.log(inputMessage.trim())
   const handleSendMessage = async () => {
     if (isConnected && inputMessage.trim()) {
       const newUserMessage: Message = {
         sender: "user",
         content: inputMessage,
       };
-
-      setInputMessage("");
+    
+      setInputMessage(inputMessage);
 
       setMessages((prev) => [...prev, newUserMessage]);
       setMessages((prev) => [
