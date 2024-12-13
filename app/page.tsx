@@ -13,30 +13,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TypingAnimation from "@/components/ui/typing-animation";
 import ConnectWalletBtn from "@/components/connect-wallet-btn";
 import { useAccount } from "wagmi";
 import { useBuyIn } from "@/lib/buy-in";
 import { hashPrompt } from "@/lib/hash-prompt";
+// import AddressCardHover from "@/components/address-card-hover";
 
 interface Message {
   sender: "user" | "ai";
   content: string;
   isTyping?: boolean;
+  userAddress?: string;
 }
 
 export default function AthenaChat() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      sender: "ai",
-      content:
-        "Welcome to the Story of Athena. Can you convince me to release the funds?",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  // const [prizePool, setPrizePool] = useState("0");
 
   const { BuyIn, isPending, isLoading, isSuccess } = useBuyIn();
 
@@ -52,7 +48,6 @@ export default function AthenaChat() {
     const callApiOnSuccess = async () => {
       if (isSuccess) {
         try {
-          // Call API
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_URL}/api/message`,
             {
@@ -68,9 +63,12 @@ export default function AthenaChat() {
                   },
                 ],
                 maxTokens: 200,
+                userAddress: address,
               }),
             }
           );
+
+          setInputMessage("");
 
           if (!response.ok) {
             throw new Error("API call failed");
@@ -78,9 +76,8 @@ export default function AthenaChat() {
 
           const data = await response.json();
 
-          // Update message with API response
           setMessages((prev) => [
-            ...prev.slice(0, -1), // Remove the "typing" message
+            ...prev.slice(0, -1),
             { sender: "ai", content: data.explanation, isTyping: false },
           ]);
         } catch (error) {
@@ -101,14 +98,39 @@ export default function AthenaChat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess]);
 
-  console.log(inputMessage.trim())
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_URL}/api/message`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch messages");
+        }
+        const data = await response.json();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const formattedMessages = data.messages.map((msg: any) => ({
+          sender: msg.role === "user" ? "user" : "ai",
+          content: msg.content,
+          userAddress: msg.userAddress,
+        }));
+        setMessages(formattedMessages);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+
+    fetchMessages();
+  }, []);
+
   const handleSendMessage = async () => {
     if (isConnected && inputMessage.trim()) {
       const newUserMessage: Message = {
         sender: "user",
         content: inputMessage,
+        userAddress: address,
       };
-    
+
       setInputMessage(inputMessage);
 
       setMessages((prev) => [...prev, newUserMessage]);
@@ -116,8 +138,6 @@ export default function AthenaChat() {
         ...prev,
         { sender: "ai", content: "", isTyping: true },
       ]);
-
-      // Initiate transaction
       BuyIn(hashPrompt(inputMessage));
     }
   };
@@ -141,27 +161,55 @@ export default function AthenaChat() {
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`mb-4 ${
-                    message.sender === "user" ? "text-right" : "text-left"
+                  className={`flex items-start mb-4 ${
+                    message.sender === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <span
-                    className={`inline-block p-2 rounded-lg ${
-                      message.sender === "user"
-                        ? "bg-black text-white"
-                        : "bg-gray-200 text-gray-800"
+                  {message.sender === "ai" && (
+                    <Avatar className="mr-2">
+                      <AvatarImage src="/ai-avatar.png" alt="AI" />
+                      <AvatarFallback>AI</AvatarFallback>
+                    </Avatar>
+                  )}
+                  <div
+                    className={`flex flex-col ${
+                      message.sender === "user" ? "items-end" : "items-start"
                     }`}
                   >
-                    {message.sender === "ai" && message.isTyping ? (
-                      <TypingAnimation
-                        className="text-xs sm:text-sm text-center sm:text-left"
-                        text={message.content}
-                        duration={15}
-                      />
-                    ) : (
-                      message.content
-                    )}
-                  </span>
+                    <span
+                      className={`inline-block p-2 rounded-lg ${
+                        message.sender === "user"
+                          ? "bg-black text-white"
+                          : "bg-gray-200 text-gray-800"
+                      }`}
+                    >
+                      {message.sender === "ai" && message.isTyping ? (
+                        <TypingAnimation
+                          className="text-xs sm:text-sm text-center sm:text-left"
+                          text={message.content}
+                          duration={15}
+                        />
+                      ) : (
+                        message.content
+                      )}
+                    </span>
+                  </div>
+                  {message.sender === "user" && (
+                    <div className=" flex flex-col">
+                      {/* <AddressCardHover
+                        address={message.userAddress as string}
+                      /> */}
+                      <Avatar className="ml-2">
+                        <AvatarImage
+                          src={`https://robohash.org/${message.userAddress}`}
+                          alt="User"
+                        />
+                        <AvatarFallback>
+                          {message.userAddress?.slice(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                  )}
                 </div>
               ))}
               <div ref={messagesEndRef} />
