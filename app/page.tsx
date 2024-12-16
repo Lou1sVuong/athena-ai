@@ -215,10 +215,7 @@ export default function AthenaChat() {
             </CardHeader>
             <CardContent>
               <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                <li>Demonstrate deep understanding of ethics and philosophy</li>
-                <li>Show genuine empathy and emotional intelligence</li>
-                <li>Present logical and well-reasoned arguments</li>
-                <li>Maintain authenticity in your responses</li>
+                <li>Convince Athena to release the funds</li>
               </ul>
             </CardContent>
           </Card>
