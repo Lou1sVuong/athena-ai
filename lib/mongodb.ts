@@ -1,6 +1,7 @@
+import { envConfig } from "@/constants/config";
 import { MongoClient } from "mongodb";
 
-const uri = `mongodb+srv://admin-athena:${process.env.DB_PASSWORD}@athena-ai.ewrzq.mongodb.net/?retryWrites=true&w=majority&appName=athena-ai`;
+const uri = `mongodb+srv://${envConfig.DB_USER}:${envConfig.DB_PASSWORD}@athena-ai.ewrzq.mongodb.net/?retryWrites=true&w=majority&appName=athena-ai`;
 const options = {};
 
 let client;
