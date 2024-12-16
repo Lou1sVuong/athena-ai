@@ -7,7 +7,7 @@ import BUYIN_ABI from "@/abi/buy-in.json";
 import { toast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
 
-const contractAddress = "0x8e305cE49E7F37e287B4A958588CB2CBf1c262c2";
+const contractAddress = "0xe6B9FBF0E98230e1A168BcDdAb82b334705b406B";
 
 export function useBuyIn() {
   // Set up the contract write function
