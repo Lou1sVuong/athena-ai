@@ -14,7 +14,7 @@ import { WagmiProvider, http } from "wagmi";
 
 const { wallets } = getDefaultWallets();
 
-const config = getDefaultConfig({
+export const config = getDefaultConfig({
   appName: "athena",
   projectId: "455a9939d641d79b258424737e7f9205",
   wallets: [
