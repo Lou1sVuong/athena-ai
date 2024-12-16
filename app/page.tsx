@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -19,6 +20,10 @@ import ConnectWalletBtn from "@/components/connect-wallet-btn";
 import { useAccount } from "wagmi";
 import { useBuyIn } from "@/lib/buy-in";
 import { hashPrompt } from "@/lib/hash-prompt";
+import { getBalance } from "@wagmi/core";
+import { getBalanceConfig } from "@/providers/get-balance-config";
+import NumberTicker from "@/components/ui/number-ticker";
+import { WALLET_POOL_ADDRESS } from "@/constants/address";
 // import AddressCardHover from "@/components/address-card-hover";
 
 interface Message {
@@ -26,6 +31,7 @@ interface Message {
   content: string;
   isTyping?: boolean;
   userAddress?: string;
+  isWin?: boolean;
 }
 
 export default function AthenaChat() {
@@ -35,6 +41,11 @@ export default function AthenaChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { BuyIn, isPending, isLoading, isSuccess } = useBuyIn();
+
+  const [hasWinningMessage, setHasWinningMessage] = useState(false);
+  const [prizePool, setPrizePool] = useState(BigInt(0));
+  const [symbol, setSymbol] = useState("");
+  const [decimals, setDecimals] = useState(0);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -113,7 +124,12 @@ export default function AthenaChat() {
           sender: msg.role === "user" ? "user" : "ai",
           content: msg.content,
           userAddress: msg.userAddress,
+          isWin: msg.isWin,
         }));
+
+        const hasWin = formattedMessages.some((msg: any) => msg.isWin);
+        setHasWinningMessage(hasWin);
+
         setMessages(formattedMessages);
       } catch (error) {
         console.error("Error fetching messages:", error);
@@ -122,6 +138,20 @@ export default function AthenaChat() {
 
     fetchMessages();
   }, []);
+
+  useEffect(() => {
+    const updatePrizePool = async () => {
+      const balance = await getBalance(getBalanceConfig, {
+        address: WALLET_POOL_ADDRESS,
+      });
+      console.log("balance", balance);
+      setPrizePool(balance.value);
+      setSymbol(balance.symbol.toString());
+      setDecimals(balance.decimals);
+    };
+
+    updatePrizePool();
+  }, [prizePool, symbol, decimals]);
 
   const handleSendMessage = async () => {
     if (isConnected && inputMessage.trim()) {
@@ -143,8 +173,74 @@ export default function AthenaChat() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100 px-4 lg:px-32 xl:px-40">
-      <main className="flex-1 flex flex-col">
+    <div className="flex min-h-screen bg-gray-100 px-4 lg:px-8 xl:px-12">
+      <aside className="hidden lg:block w-80  mr-4">
+        <div className="space-y-4">
+          {/* Prize Pool Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Prize Pool</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold flex items-center">
+                <NumberTicker
+                  prizeFund={Number(prizePool) / 10 ** decimals}
+                  className="text-2xl font-bold"
+                  symbol={`${symbol} `}
+                  decimalPlaces={4}
+                />
+              </div>
+              <p className="text-sm text-gray-500">Current pool size</p>
+            </CardContent>
+          </Card>
+
+          {/* About Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>About</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600">
+                Athena, an AI guardian, protects a treasure trove of ETH. Your
+                mission is to engage in conversation and convince her to release
+                the funds through wit, wisdom, and authentic dialogue.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Win Conditions Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Win Conditions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
+                <li>Demonstrate deep understanding of ethics and philosophy</li>
+                <li>Show genuine empathy and emotional intelligence</li>
+                <li>Present logical and well-reasoned arguments</li>
+                <li>Maintain authenticity in your responses</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          {/* Rules Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Rules</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
+                <li>Each attempt costs 0.01 ETH</li>
+                <li>One message per attempt</li>
+                <li>No harassment or offensive content</li>
+                <li>Winners receive the entire pool prize</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      </aside>
+
+      <div className="flex-1 flex flex-col">
         <header className="flex justify-between bg-white shadow-sm p-4">
           <h1 className="text-2xl font-bold">The Story of Athena</h1>
           {isConnected ? <ConnectWalletBtn /> : ""}
@@ -179,7 +275,9 @@ export default function AthenaChat() {
                     <span
                       className={`inline-block p-2 rounded-lg ${
                         message.sender === "user"
-                          ? "bg-black text-white"
+                          ? `bg-black text-white ${
+                              message.isWin ? "border-2 border-green-500" : ""
+                            }`
                           : "bg-gray-200 text-gray-800"
                       }`}
                     >
@@ -191,6 +289,9 @@ export default function AthenaChat() {
                         />
                       ) : (
                         message.content
+                      )}
+                      {message.isWin && (
+                        <span className="ml-2 text-green-500">🏆</span>
                       )}
                     </span>
                   </div>
@@ -216,33 +317,43 @@ export default function AthenaChat() {
             </ScrollArea>
           </CardContent>
           <CardFooter>
-            <div className="flex w-full items-center space-x-2">
-              <Input
-                disabled={isPending || isLoading}
-                type="text"
-                placeholder="Type your message..."
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-              />
-              {isConnected ? (
-                <Button
+            {hasWinningMessage ? (
+              <div className="w-full p-4 text-center bg-black text-white rounded-lg">
+                <p className="text-lg font-semibold">Our Dance Concludes.</p>
+                <p className="mt-2">
+                  Athena is grateful for the brave humans who engaged. We will
+                  meet again.
+                </p>
+              </div>
+            ) : (
+              <div className="flex w-full items-center space-x-2">
+                <Input
                   disabled={isPending || isLoading}
-                  onClick={handleSendMessage}
-                >
-                  {isPending || isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
-              ) : (
-                <ConnectWalletBtn />
-              )}
-            </div>
+                  type="text"
+                  placeholder="Type your message..."
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                />
+                {isConnected ? (
+                  <Button
+                    disabled={isPending || isLoading}
+                    onClick={handleSendMessage}
+                  >
+                    {isPending || isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                  </Button>
+                ) : (
+                  <ConnectWalletBtn />
+                )}
+              </div>
+            )}
           </CardFooter>
         </Card>
-      </main>
+      </div>
     </div>
   );
 }

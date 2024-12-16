@@ -26,6 +26,7 @@ export async function POST(req: Request) {
       role: "user",
       timestamp: new Date(),
       userAddress: userAddress,
+      isWin: response.decision === true
     };
     await db.collection(envConfig.DB_MESSAGES_COLLECTION).insertOne(userMessage);
 

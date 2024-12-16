@@ -5,6 +5,7 @@ interface IMessage extends Document {
   role: "user" | "assistant";
   timestamp: Date;
   userAddress?: string;
+  isWin ?: boolean;
 }
 
 const MessageSchema: Schema = new Schema({
@@ -12,6 +13,7 @@ const MessageSchema: Schema = new Schema({
   role: { type: String, required: true, enum: ["user", "assistant"] },
   timestamp: { type: Date, default: Date.now },
   userAddress: { type: String },
+  isWin: { type: Boolean }
 });
 
 export const Message =
