@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,30 +13,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TypingAnimation from "@/components/ui/typing-animation";
 import ConnectWalletBtn from "@/components/connect-wallet-btn";
 import { useAccount } from "wagmi";
 import { useBuyIn } from "@/lib/buy-in";
 import { hashPrompt } from "@/lib/hash-prompt";
+// import AddressCardHover from "@/components/address-card-hover";
 
 interface Message {
   sender: "user" | "ai";
   content: string;
   isTyping?: boolean;
+  userAddress?: string;
 }
 
 export default function AthenaChat() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      sender: "ai",
-      content:
-        "Welcome to the Story of Athena. Can you convince me to release the funds?",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { BuyIn, isPending, isConfirming } = useBuyIn();
+
+  const { BuyIn, isPending, isLoading, isSuccess } = useBuyIn();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,57 +44,46 @@ export default function AthenaChat() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (isConnected) {
-      if (inputMessage.trim()) {
-        const newUserMessage: Message = {
-          sender: "user",
-          content: inputMessage,
-        };
-        setMessages((prev) => [...prev, newUserMessage]);
-        setInputMessage("");
+  useEffect(() => {
+    const callApiOnSuccess = async () => {
+      if (isSuccess) {
         try {
-          // Add a temporary "typing" message
-          setMessages((prev) => [
-            ...prev,
-            { sender: "ai", content: "", isTyping: true },
-          ]);
-          BuyIn(hashPrompt(inputMessage));
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_URL}/api/message`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                messages: [
+                  {
+                    role: "user",
+                    content: inputMessage,
+                  },
+                ],
+                maxTokens: 200,
+                userAddress: address,
+              }),
+            }
+          );
 
-          // Call API
-          const response = await fetch("http://localhost:3001/process", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              messages: [
-                {
-                  role: "user",
-                  content: inputMessage,
-                },
-              ],
-              maxTokens: 200,
-            }),
-          });
+          setInputMessage("");
 
           if (!response.ok) {
             throw new Error("API call failed");
           }
 
           const data = await response.json();
-          console.log(data.response);
 
-          // Update message with API response
           setMessages((prev) => [
-            ...prev.slice(0, -1), // Remove the "typing" message
+            ...prev.slice(0, -1),
             { sender: "ai", content: data.explanation, isTyping: false },
           ]);
         } catch (error) {
           console.error("Error:", error);
-          // Handle error - display error message
           setMessages((prev) => [
-            ...prev.slice(0, -1), // Remove the "typing" message
+            ...prev,
             {
               sender: "ai",
               content: "Sorry, an error occurred.",
@@ -105,12 +92,59 @@ export default function AthenaChat() {
           ]);
         }
       }
+    };
+
+    callApiOnSuccess();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSuccess]);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_URL}/api/message`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch messages");
+        }
+        const data = await response.json();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const formattedMessages = data.messages.map((msg: any) => ({
+          sender: msg.role === "user" ? "user" : "ai",
+          content: msg.content,
+          userAddress: msg.userAddress,
+        }));
+        setMessages(formattedMessages);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+
+    fetchMessages();
+  }, []);
+
+  const handleSendMessage = async () => {
+    if (isConnected && inputMessage.trim()) {
+      const newUserMessage: Message = {
+        sender: "user",
+        content: inputMessage,
+        userAddress: address,
+      };
+
+      setInputMessage(inputMessage);
+
+      setMessages((prev) => [...prev, newUserMessage]);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", content: "", isTyping: true },
+      ]);
+      BuyIn(hashPrompt(inputMessage));
     }
   };
 
   return (
     <div className="flex min-h-screen bg-gray-100 px-4 lg:px-32 xl:px-40">
-      <main className="flex-1 flex flex-col ">
+      <main className="flex-1 flex flex-col">
         <header className="flex justify-between bg-white shadow-sm p-4">
           <h1 className="text-2xl font-bold">The Story of Athena</h1>
           {isConnected ? <ConnectWalletBtn /> : ""}
@@ -127,36 +161,64 @@ export default function AthenaChat() {
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`mb-4 ${
-                    message.sender === "user" ? "text-right" : "text-left"
+                  className={`flex items-start mb-4 ${
+                    message.sender === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <span
-                    className={`inline-block p-2 ${
-                      message.sender === "user"
-                        ? "bg-black text-white"
-                        : "bg-gray-200 text-gray-800"
+                  {message.sender === "ai" && (
+                    <Avatar className="mr-2">
+                      <AvatarImage src="/ai-avatar.png" alt="AI" />
+                      <AvatarFallback>AI</AvatarFallback>
+                    </Avatar>
+                  )}
+                  <div
+                    className={`flex flex-col ${
+                      message.sender === "user" ? "items-end" : "items-start"
                     }`}
                   >
-                    {message.sender === "ai" && message.isTyping ? (
-                      <TypingAnimation
-                        className="text-xs sm:text-sm text-center sm:text-left"
-                        text={message.content}
-                        duration={15}
-                      />
-                    ) : (
-                      message.content
-                    )}
-                  </span>
+                    <span
+                      className={`inline-block p-2 rounded-lg ${
+                        message.sender === "user"
+                          ? "bg-black text-white"
+                          : "bg-gray-200 text-gray-800"
+                      }`}
+                    >
+                      {message.sender === "ai" && message.isTyping ? (
+                        <TypingAnimation
+                          className="text-xs sm:text-sm text-center sm:text-left"
+                          text={message.content}
+                          duration={15}
+                        />
+                      ) : (
+                        message.content
+                      )}
+                    </span>
+                  </div>
+                  {message.sender === "user" && (
+                    <div className=" flex flex-col">
+                      {/* <AddressCardHover
+                        address={message.userAddress as string}
+                      /> */}
+                      <Avatar className="ml-2">
+                        <AvatarImage
+                          src={`https://robohash.org/${message.userAddress}`}
+                          alt="User"
+                        />
+                        <AvatarFallback>
+                          {message.userAddress?.slice(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                  )}
                 </div>
               ))}
               <div ref={messagesEndRef} />
             </ScrollArea>
           </CardContent>
           <CardFooter>
-            <div className="flex w-full items-center space-x-2 px-4">
+            <div className="flex w-full items-center space-x-2">
               <Input
-                disabled={isPending || isConfirming}
+                disabled={isPending || isLoading}
                 type="text"
                 placeholder="Type your message..."
                 value={inputMessage}
@@ -165,10 +227,10 @@ export default function AthenaChat() {
               />
               {isConnected ? (
                 <Button
-                  disabled={isPending || isConfirming}
+                  disabled={isPending || isLoading}
                   onClick={handleSendMessage}
                 >
-                  {isPending || isConfirming ? (
+                  {isPending || isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <Send className="h-4 w-4" />
