@@ -1,6 +1,21 @@
-import { SendMessageOptions, StructuredMessage } from "@/services/llm/types";
+import { Message, SendMessageOptions, StructuredMessage } from "@/services/llm/types";
+import * as fs from 'fs/promises';
+
 import OpenAI from "openai";
 
+async function getSysContentFromFile(): Promise<string> {
+  try {
+    const filePath = './services/llm/system.txt';
+    const content = await fs.readFile(filePath, 'utf-8');
+
+    const encodedContent = JSON.stringify(content);
+
+    return encodedContent.slice(1, -1);
+  } catch (error) {
+    console.error(`Error reading or encoding the sys_prompt file: ${error}`);
+    return "";
+  }
+}
 export async function sendMessage({
   messages,
   maxTokens = 3000,
@@ -8,10 +23,12 @@ export async function sendMessage({
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
-
+  const syscontent = await getSysContentFromFile();
+  const handleMessage : Message[] = [{ role: "system", content: syscontent }, ...messages];
+  
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
-    messages: messages,
+    messages: handleMessage,
     tools: [
       {
         type: "function",
