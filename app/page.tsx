@@ -24,7 +24,7 @@ import { getBalance } from "@wagmi/core";
 import { getBalanceConfig } from "@/providers/get-balance-config";
 import NumberTicker from "@/components/ui/number-ticker";
 import { WALLET_POOL_ADDRESS } from "@/constants/address";
-// import AddressCardHover from "@/components/address-card-hover";
+import AddressCardHover from "@/components/address-card-hover";
 
 interface Message {
   sender: "user" | "ai";
@@ -269,6 +269,23 @@ export default function AthenaChat() {
                       message.sender === "user" ? "items-end" : "items-start"
                     }`}
                   >
+                    {message.sender === "user" && (
+                      <div className="mb-1 flex items-center">
+                        <AddressCardHover
+                          address={message.userAddress || ""}
+                          className="mr-2"
+                        />
+                        <Avatar>
+                          <AvatarImage
+                            src={`https://robohash.org/${message.userAddress}`}
+                            alt="User"
+                          />
+                          <AvatarFallback>
+                            {message.userAddress?.slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                    )}
                     <span
                       className={`inline-block p-2 rounded-lg ${
                         message.sender === "user"
@@ -292,22 +309,6 @@ export default function AthenaChat() {
                       )}
                     </span>
                   </div>
-                  {message.sender === "user" && (
-                    <div className=" flex flex-col">
-                      {/* <AddressCardHover
-                        address={message.userAddress as string}
-                      /> */}
-                      <Avatar className="ml-2">
-                        <AvatarImage
-                          src={`https://robohash.org/${message.userAddress}`}
-                          alt="User"
-                        />
-                        <AvatarFallback>
-                          {message.userAddress?.slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                  )}
                 </div>
               ))}
               <div ref={messagesEndRef} />
