@@ -12,7 +12,7 @@ const contractAddress = "0xe6B9FBF0E98230e1A168BcDdAb82b334705b406B";
 export function useBuyIn() {
   // Set up the contract write function
   const { data: hash, error, isPending, writeContract } = useWriteContract();
-  const valueInWei = ethers.parseEther("0.001");
+  const valueInWei = ethers.parseEther("0.00015");
 
   async function BuyIn(hashedPrompt: string) {
     try {
