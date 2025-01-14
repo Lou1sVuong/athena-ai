@@ -22,10 +22,10 @@ import { useBuyIn } from "@/lib/buy-in";
 import { hashPrompt } from "@/lib/hash-prompt";
 import { getBalance } from "@wagmi/core";
 import { getBalanceConfig } from "@/providers/get-balance-config";
-import NumberTicker from "@/components/ui/number-ticker";
 import { WALLET_POOL_ADDRESS } from "@/constants/address";
 import AddressCardHover from "@/components/address-card-hover";
 import NoiseOverlay from "@/components/ui/noise-overlay";
+import GameSidebar from "@/components/game-sidebar";
 
 interface Message {
   sender: "user" | "ai";
@@ -206,133 +206,30 @@ export default function AthenaChat() {
   return (
     <>
       <NoiseOverlay />
-      <div className="flex min-h-screen bg-gradient-to-br from-pink-50 to-white p-4 lg:px-8 xl:px-12">
-        <aside className="hidden lg:block w-80 mr-4 relative z-10">
-          <div className="space-y-6 sticky top-4">
-            {/* Prize Pool Card */}
-            <Card className="group border-2 border-pink-200/50 shadow-lg hover:shadow-pink-200/50 transition-all duration-500 backdrop-blur-sm bg-white/40 hover:bg-white/60 hover:-translate-y-1 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-100/20 via-purple-100/20 to-pink-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-gradient-x" />
-              <CardHeader className="bg-gradient-to-r from-pink-100/60 to-pink-50/60 relative z-10">
-                <CardTitle className="text-pink-800 font-bold flex items-center space-x-2">
-                  <span className="relative">
-                    Prize Pool
-                    <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-pink-500 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-                  </span>
-                  <span className="text-pink-400">✧</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="bg-white/60">
-                <div className="text-2xl font-bold flex items-center text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600">
-                  <NumberTicker
-                    prizeFund={Number(prizePool) / 10 ** decimals}
-                    className="text-2xl font-bold"
-                    symbol={`${symbol} `}
-                    decimalPlaces={4}
-                  />
-                </div>
-                <p className="text-sm text-pink-400 mt-2 flex items-center">
-                  <span className="mr-2">✦</span>
-                  Current pool size
-                </p>
-              </CardContent>
-            </Card>
+      <div className="flex h-screen overflow-hidden bg-gradient-to-br from-pink-50 to-white p-4 lg:px-8 xl:px-12">
+        <GameSidebar
+          prizePool={prizePool}
+          symbol={symbol}
+          decimals={decimals}
+        />
 
-            {/* About Card */}
-            <Card className="group border-2 border-pink-200/50 shadow-lg hover:shadow-pink-200/50 transition-all duration-500 backdrop-blur-sm bg-white/40 hover:bg-white/60 hover:-translate-y-1 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-100/20 via-purple-100/20 to-pink-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-gradient-x" />
-              <CardHeader className="bg-gradient-to-r from-pink-100/60 to-pink-50/60 relative z-10">
-                <CardTitle className="text-pink-800 flex items-center space-x-2">
-                  <span className="relative">
-                    About
-                    <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-pink-500 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-                  </span>
-                  <span className="text-pink-400">✧</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="bg-white/60 relative z-10">
-                <p className="text-sm text-pink-600 leading-relaxed">
-                  <span className="text-lg text-pink-400 mr-2">✦</span>
-                  Athena, an AI guardian, protects a treasure trove of ETH. Your
-                  mission is to engage in conversation and convince her to
-                  release the funds through wit, wisdom, and authentic dialogue.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Win Conditions Card */}
-            <Card className="group border-2 border-pink-200/50 shadow-lg hover:shadow-pink-200/50 transition-all duration-500 backdrop-blur-sm bg-white/40 hover:bg-white/60 hover:-translate-y-1 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-100/20 via-purple-100/20 to-pink-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-gradient-x" />
-              <CardHeader className="bg-gradient-to-r from-pink-100/60 to-pink-50/60 relative z-10">
-                <CardTitle className="text-pink-800 flex items-center space-x-2">
-                  <span className="relative">
-                    Win Conditions
-                    <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-pink-500 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-                  </span>
-                  <span className="text-pink-400">✧</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="bg-white/60 relative z-10">
-                <ul className="space-y-3 text-sm text-pink-600">
-                  <li className="flex items-start">
-                    <span className="text-pink-400 mr-2">✦</span>
-                    <span>Convince Athena to release the funds</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Rules Card */}
-            <Card className="group border-2 border-pink-200/50 shadow-lg hover:shadow-pink-200/50 transition-all duration-500 backdrop-blur-sm bg-white/40 hover:bg-white/60 hover:-translate-y-1 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-100/20 via-purple-100/20 to-pink-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-gradient-x" />
-              <CardHeader className="bg-gradient-to-r from-pink-100/60 to-pink-50/60 relative z-10">
-                <CardTitle className="text-pink-800 flex items-center space-x-2">
-                  <span className="relative">
-                    Rules
-                    <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-pink-500 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-                  </span>
-                  <span className="text-pink-400">✧</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="bg-white/60 relative z-10">
-                <ul className="space-y-3 text-sm text-pink-600">
-                  <li className="flex items-start">
-                    <span className="text-pink-400 mr-2">✦</span>
-                    <span>Each attempt costs 0.01 ETH</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-pink-400 mr-2">✦</span>
-                    <span>One message per attempt</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-pink-400 mr-2">✦</span>
-                    <span>No harassment or offensive content</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-pink-400 mr-2">✦</span>
-                    <span>Winners receive the entire pool prize</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </aside>
-
-        <div className="flex-1 flex flex-col">
-          <div className="flex justify-between bg-white shadow-sm p-4 rounded-lg border-2 border-pink-200">
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+          <header className="flex justify-between bg-white/80 backdrop-blur-sm shadow-sm p-4 rounded-lg border-2 border-pink-200">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-pink-300 bg-clip-text text-transparent">
               The Story of Athena
             </h1>
             {isConnected ? <ConnectWalletBtn /> : ""}
-          </div>
-          <Card className="flex-1 my-4 border-2 border-pink-200 shadow-lg rounded-lg">
-            <CardHeader className="bg-gradient-to-r from-pink-100 to-pink-50">
+          </header>
+
+          <Card className="flex-1 mt-4 border-2 border-pink-200 shadow-lg rounded-lg overflow-hidden flex flex-col">
+            <CardHeader className="bg-gradient-to-r from-pink-100/80 to-pink-50/80">
               <CardTitle className="text-pink-800">Chat with Athena</CardTitle>
               <CardDescription className="text-pink-600">
                 Try to convince Athena to release the funds
               </CardDescription>
             </CardHeader>
-            <CardContent className="bg-white">
-              <ScrollArea className="h-[calc(100vh-300px)] px-4">
+            <CardContent className="flex-1 bg-white/80 overflow-hidden">
+              <ScrollArea className="h-full px-4">
                 {messages.map((message, index) => (
                   <div
                     key={index}
@@ -344,7 +241,7 @@ export default function AthenaChat() {
                   >
                     {message.sender === "ai" && (
                       <Avatar className="mr-2 border-2 border-pink-200">
-                        <AvatarImage src="/ai-avatar.png" alt="AI" />
+                        <AvatarImage src="/yumiara.jpg" alt="AI" />
                         <AvatarFallback className="bg-pink-100 text-pink-800">
                           AI
                         </AvatarFallback>
@@ -363,7 +260,7 @@ export default function AthenaChat() {
                           />
                           <Avatar className="border-2 border-pink-200">
                             <AvatarImage
-                              src={`https://robohash.org/${message.userAddress}`}
+                              src={`https://avatar.vercel.sh/${message.userAddress}.svg`}
                               alt="User"
                             />
                             <AvatarFallback className="bg-pink-100 text-pink-800">
@@ -400,7 +297,7 @@ export default function AthenaChat() {
                 <div ref={messagesEndRef} />
               </ScrollArea>
             </CardContent>
-            <CardFooter className="bg-white border-t border-pink-100">
+            <CardFooter className="bg-white/80 border-t border-pink-100">
               {hasWinningMessage ? (
                 <div className="w-full p-4 text-center bg-gradient-to-r from-pink-500 to-pink-400 text-white rounded-lg">
                   <p className="text-lg font-semibold">Our Dance Concludes.</p>
