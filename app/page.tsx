@@ -47,6 +47,7 @@ export default function AthenaChat() {
   const [prizePool, setPrizePool] = useState(BigInt(0));
   const [symbol, setSymbol] = useState("");
   const [decimals, setDecimals] = useState(0);
+  const [aiDecision, setAiDecision] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -92,6 +93,10 @@ export default function AthenaChat() {
             ...prev.slice(0, -1),
             { sender: "ai", content: data.explanation, isTyping: false },
           ]);
+
+          if (data.decision) {
+            setAiDecision(true);
+          }
         } catch (error) {
           console.error("Error:", error);
           setMessages((prev) => [
@@ -298,7 +303,7 @@ export default function AthenaChat() {
               </ScrollArea>
             </CardContent>
             <CardFooter className="bg-white/80 border-t border-pink-100">
-              {hasWinningMessage ? (
+              {hasWinningMessage || aiDecision ? (
                 <div className="w-full p-4 text-center bg-gradient-to-r from-pink-500 to-pink-400 text-white rounded-lg">
                   <p className="text-lg font-semibold">Our Dance Concludes.</p>
                   <p className="mt-2">
