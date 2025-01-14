@@ -33,7 +33,7 @@ export default function ConnectWalletBtn() {
                   <Button
                     onClick={openConnectModal}
                     variant="default"
-                    className="rounded-none bg-foreground text-background hover:bg-foreground/90"
+                    className="rounded-lg bg-gradient-to-r from-pink-500 to-pink-400 text-white hover:from-pink-600 hover:to-pink-500 border-2 border-pink-200 shadow-lg hover:shadow-pink-100 transition-all"
                   >
                     Connect wallet to chat
                   </Button>
@@ -45,7 +45,7 @@ export default function ConnectWalletBtn() {
                   <Button
                     onClick={openChainModal}
                     variant="destructive"
-                    className="rounded-none bg-foreground text-background hover:bg-foreground/90"
+                    className="rounded-lg bg-gradient-to-r from-red-500 to-red-400 text-white hover:from-red-600 hover:to-red-500 border-2 border-red-200 shadow-lg hover:shadow-red-100 transition-all"
                   >
                     Wrong network
                   </Button>
@@ -57,11 +57,8 @@ export default function ConnectWalletBtn() {
                   <Button
                     onClick={openChainModal}
                     variant="default"
-                    className="rounded-none bg-foreground text-background hover:bg-foreground/90"
+                    className="rounded-lg bg-gradient-to-r from-pink-500 to-pink-400 text-white hover:from-pink-600 hover:to-pink-500 border-2 border-pink-200 shadow-lg hover:shadow-pink-100 transition-all flex items-center gap-1"
                   >
-                    {/* {chain.name && chain.name.length > 10
-                      ? `${chain.name.slice(0, 2)}..${chain.name.slice(-2)}`
-                      : chain.name} */}
                     {chain.name && chain.name === "Klaytn Baobab"
                       ? "Kairos"
                       : chain.name}
@@ -71,9 +68,15 @@ export default function ConnectWalletBtn() {
                   <Button
                     onClick={openAccountModal}
                     variant="default"
-                    className="rounded-none bg-foreground text-background hover:bg-foreground/90"
+                    className="rounded-lg bg-gradient-to-r from-pink-500 to-pink-400 text-white hover:from-pink-600 hover:to-pink-500 border-2 border-pink-200 shadow-lg hover:shadow-pink-100 transition-all flex items-center gap-2"
                   >
-                    <img src={account.ensAvatar} alt="" />
+                    {account.ensAvatar && (
+                      <img
+                        src={account.ensAvatar}
+                        alt=""
+                        className="w-5 h-5 rounded-full border border-pink-200"
+                      />
+                    )}
                     {account.displayName}
                   </Button>
                 </div>
