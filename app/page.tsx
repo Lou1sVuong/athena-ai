@@ -26,6 +26,7 @@ import { WALLET_POOL_ADDRESS } from "@/constants/address";
 import AddressCardHover from "@/components/address-card-hover";
 import NoiseOverlay from "@/components/ui/noise-overlay";
 import GameSidebar from "@/components/game-sidebar";
+import GameHeader from "@/components/game-header";
 
 interface Message {
   sender: "user" | "ai";
@@ -48,6 +49,7 @@ export default function AthenaChat() {
   const [symbol, setSymbol] = useState("");
   const [decimals, setDecimals] = useState(0);
   const [aiDecision, setAiDecision] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -190,8 +192,8 @@ export default function AthenaChat() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            sender: "0xfBF507D1803014b4C5796Ed1197B90dBEfFEfe8A",
-            recipient: "0xfBF507D1803014b4C5796Ed1197B90dBEfFEfe8A",
+            sender: address,
+            recipient: "0xf6ad6baafdac1b15bcde4f94d6ad412620b55405",
             route: getRouteData.route,
             deadline: 1800000000,
             source: "buildstation-open-source",
@@ -216,17 +218,19 @@ export default function AthenaChat() {
           prizePool={prizePool}
           symbol={symbol}
           decimals={decimals}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
         />
 
         <div className="flex-1 flex flex-col h-full overflow-hidden">
-          <header className="flex justify-between bg-white/80 backdrop-blur-sm shadow-sm p-4 rounded-lg border-2 border-pink-200">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-pink-300 bg-clip-text text-transparent">
-              The Story of Athena
-            </h1>
+          <GameHeader
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
+          <div className="flex py-2 justify-center items-center">
             {isConnected ? <ConnectWalletBtn /> : ""}
-          </header>
+          </div>
 
-          <Card className="flex-1 mt-4 border-2 border-pink-200 shadow-lg rounded-lg overflow-hidden flex flex-col">
+          <Card className="flex-1 border-2 border-pink-200 shadow-lg rounded-lg overflow-hidden flex flex-col">
             <CardHeader className="bg-gradient-to-r from-pink-100/80 to-pink-50/80">
               <CardTitle className="text-pink-800">Chat with Athena</CardTitle>
               <CardDescription className="text-pink-600">

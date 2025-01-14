@@ -1,21 +1,44 @@
+import { FC } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import NumberTicker from "@/components/ui/number-ticker";
+import { X } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface GameSidebarProps {
   prizePool: bigint;
   symbol: string;
   decimals: number;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function GameSidebar({
+const GameSidebar: FC<GameSidebarProps> = ({
   prizePool,
   symbol,
   decimals,
-}: GameSidebarProps) {
+  isOpen,
+  onClose,
+}) => {
   return (
-    <aside className="hidden lg:block w-80 mr-4 relative z-10">
+    <div
+      className={`
+        fixed inset-y-0 mr-4 left-0 transform lg:relative lg:translate-x-0 transition-transform duration-300 ease-in-out z-30
+        ${isOpen ? "translate-x-0 border-r-2" : "-translate-x-full"}
+        w-80 bg-white/80 backdrop-blur-sm p-4  border-pink-200
+        lg:block
+      `}
+    >
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onClose}
+        className="absolute top-2 right-2 lg:hidden"
+      >
+        <X className="h-8 w-8 text-pink-500" />
+      </Button>
+
       <div
-        className="h-full space-y-4 pr-2 overflow-y-auto"
+        className="h-full space-y-4 pr-2 overflow-y-auto custom-scrollbar"
         style={{
           scrollbarWidth: "thin",
           scrollbarColor: "#F9A8D4 transparent",
@@ -144,6 +167,8 @@ export default function GameSidebar({
           </CardContent>
         </Card>
       </div>
-    </aside>
+    </div>
   );
-}
+};
+
+export default GameSidebar;
