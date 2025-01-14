@@ -8,7 +8,7 @@ import {
   darkTheme,
 } from "@rainbow-me/rainbowkit";
 import { trustWallet, ledgerWallet } from "@rainbow-me/rainbowkit/wallets";
-import { baseSepolia, kairos, base } from "wagmi/chains";
+import { baseSepolia, base } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider, http } from "wagmi";
 
@@ -24,10 +24,10 @@ export const config = getDefaultConfig({
       wallets: [trustWallet, ledgerWallet],
     },
   ],
-  chains: [baseSepolia, base, kairos],
+  chains: [baseSepolia, base],
   transports: {
     [baseSepolia.id]: http("https://sepolia.base.org"),
-    [kairos.id]: http("https://rpc.ankr.com/klaytn_testnet"),
+    [base.id]: http("https://mainnet.base.org"),
   },
   ssr: true,
 });
