@@ -168,6 +168,34 @@ export default function AthenaChat() {
         ...prev,
         { sender: "ai", content: "", isTyping: true },
       ]);
+
+      const getRoute = await fetch(
+        `https://zap-api.kyberswap.com/base/api/v1/in/route?dex=DEX_UNISWAPV2&pool.id=0xf6ad6baafdac1b15bcde4f94d6ad412620b55405&position.id=0xfBF507D1803014b4C5796Ed1197B90dBEfFEfe8A&tokensIn=0xc58e14c906b1dcc0a1d4b4540da2c1e84e229b99&amountsIn=100000000000000000&slippage=50`
+      );
+      if (!getRoute.ok) {
+        throw new Error("Failed to fetch Route");
+      }
+      const { data: getRouteData } = await getRoute.json();
+      const buildRoute = await fetch(
+        `https://zap-api.kyberswap.com/base/api/v1/in/route/build`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sender: "0xfBF507D1803014b4C5796Ed1197B90dBEfFEfe8A",
+            recipient: "0xfBF507D1803014b4C5796Ed1197B90dBEfFEfe8A",
+            route: getRouteData.route,
+            deadline: 1800000000,
+            source: "buildstation-open-source",
+          }),
+        }
+      );
+
+      const { data: buildRouteData } = await buildRoute.json();
+      console.log(buildRouteData.callData);
+
       BuyIn(hashPrompt(inputMessage));
     }
   };

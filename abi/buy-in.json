@@ -7,33 +7,85 @@
         "type": "address",
         "internalType": "address"
       },
-      { "name": "feePerc_", "type": "uint256", "internalType": "uint256" }
+      {
+        "name": "feePerc_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_paymentToken",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_router",
+        "type": "address",
+        "internalType": "address"
+      }
     ],
     "stateMutability": "nonpayable"
   },
-  { "type": "fallback", "stateMutability": "payable" },
-  { "type": "receive", "stateMutability": "payable" },
   {
-    "type": "function",
-    "name": "buyIn",
-    "inputs": [
-      { "name": "hashedPrompt", "type": "bytes32", "internalType": "bytes32" }
-    ],
-    "outputs": [],
+    "type": "fallback",
+    "stateMutability": "payable"
+  },
+  {
+    "type": "receive",
     "stateMutability": "payable"
   },
   {
     "type": "function",
-    "name": "getFeeRecipientBalance",
+    "name": "buyIn",
+    "inputs": [
+      {
+        "name": "hashedPrompt",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "paymentToken",
     "inputs": [],
-    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract IERC20"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "router",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract IRouter"
+      }
+    ],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "setFee",
     "inputs": [
-      { "name": "feePerc_", "type": "uint256", "internalType": "uint256" }
+      {
+        "name": "feePerc_",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -55,7 +107,24 @@
     "type": "function",
     "name": "setOperator",
     "inputs": [
-      { "name": "operator_", "type": "address", "internalType": "address" }
+      {
+        "name": "operator_",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "withdrawToken",
+    "inputs": [
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -74,6 +143,7 @@
         "name": "hashedPrompt",
         "type": "bytes32",
         "indexed": false,
+
         "internalType": "bytes32"
       },
       {
