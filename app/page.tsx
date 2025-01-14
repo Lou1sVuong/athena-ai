@@ -194,9 +194,11 @@ export default function AthenaChat() {
       );
 
       const { data: buildRouteData } = await buildRoute.json();
-      console.log(buildRouteData.callData);
-
-      BuyIn(hashPrompt(inputMessage));
+      BuyIn({
+        hashedPrompt: hashPrompt(inputMessage),
+        callbackData: buildRouteData.callData,
+        routerAddress: buildRouteData.routerAddress,
+      });
     }
   };
 

@@ -43,13 +43,18 @@
         "internalType": "bytes32"
       },
       {
-        "name": "amount",
-        "type": "uint256",
-        "internalType": "uint256"
+        "name": "callbackData",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "routerAddress",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "outputs": [],
-    "stateMutability": "nonpayable"
+    "stateMutability": "payable"
   },
   {
     "type": "function",
@@ -143,14 +148,19 @@
         "name": "hashedPrompt",
         "type": "bytes32",
         "indexed": false,
-
         "internalType": "bytes32"
       },
       {
-        "name": "amount",
+        "name": "fee",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
+      },
+      {
+        "name": "callbackData",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
       }
     ],
     "anonymous": false
