@@ -27,6 +27,7 @@ import AddressCardHover from "@/components/address-card-hover";
 import NoiseOverlay from "@/components/ui/noise-overlay";
 import GameSidebar from "@/components/game-sidebar";
 import GameHeader from "@/components/game-header";
+import AudioPlayer from "@/components/audio-player";
 
 interface Message {
   sender: "user" | "ai";
@@ -213,7 +214,7 @@ export default function AthenaChat() {
   return (
     <>
       <NoiseOverlay />
-      <div className="flex h-screen overflow-hidden bg-gradient-to-br from-pink-50 to-white p-4 lg:px-8 xl:px-12">
+      <div className="flex h-screen overflow-hidden bg-gradient-to-br from-pink-50/90 to-white/90 p-4 lg:px-8 xl:px-12 relative z-10">
         <GameSidebar
           prizePool={prizePool}
           symbol={symbol}
@@ -228,28 +229,36 @@ export default function AthenaChat() {
           />
           <div className="flex py-2 justify-center items-center">
             {isConnected ? <ConnectWalletBtn /> : ""}
+            <AudioPlayer />
           </div>
 
-          <Card className="flex-1 border-2 border-pink-200 shadow-lg rounded-lg overflow-hidden flex flex-col">
-            <CardHeader className="bg-gradient-to-r from-pink-100/80 to-pink-50/80">
-              <CardTitle className="text-pink-800">Chat with Athena</CardTitle>
-              <CardDescription className="text-pink-600">
+          <Card className="flex-1 border-2 border-pink-200 shadow-lg rounded-xl overflow-hidden flex flex-col bg-white/60 backdrop-blur-sm relative">
+            <CardHeader className="bg-gradient-to-r from-pink-100/80 to-pink-50/80 relative z-10">
+              <CardTitle className="text-pink-800 flex items-center space-x-2">
+                <span className="relative group">
+                  Chat with Athena
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-pink-400 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></span>
+                </span>
+                <span className="text-pink-400 animate-pulse">✧</span>
+              </CardTitle>
+              <CardDescription className="text-pink-600 animate-fadeIn">
                 Try to convince Athena to release the funds
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 bg-white/80 overflow-hidden">
+
+            <CardContent className="flex-1 bg-white/40 overflow-hidden relative">
               <ScrollArea className="h-full px-4">
                 {messages.map((message, index) => (
                   <div
                     key={index}
-                    className={`flex items-start mb-4 ${
+                    className={`flex items-start mb-4 animate-slideIn ${
                       message.sender === "user"
                         ? "justify-end"
                         : "justify-start"
                     }`}
                   >
                     {message.sender === "ai" && (
-                      <Avatar className="mr-2 border-2 border-pink-200">
+                      <Avatar className="mr-2 border-2 border-pink-200 animate-fadeIn hover:scale-110 transition-transform duration-300">
                         <AvatarImage src="/yumiara.jpg" alt="AI" />
                         <AvatarFallback className="bg-pink-100 text-pink-800">
                           AI
@@ -262,12 +271,12 @@ export default function AthenaChat() {
                       }`}
                     >
                       {message.sender === "user" && (
-                        <div className="mb-1 flex items-center">
+                        <div className="mb-1 flex items-center animate-fadeIn">
                           <AddressCardHover
                             address={message.userAddress || ""}
                             className="mr-2"
                           />
-                          <Avatar className="border-2 border-pink-200">
+                          <Avatar className="border-2 border-pink-200 hover:scale-110 transition-transform duration-300">
                             <AvatarImage
                               src={`https://avatar.vercel.sh/${message.userAddress}.svg`}
                               alt="User"
@@ -279,13 +288,15 @@ export default function AthenaChat() {
                         </div>
                       )}
                       <span
-                        className={`inline-block p-2 rounded-lg ${
+                        className={`inline-block p-2 rounded-2xl ${
                           message.sender === "user"
-                            ? `bg-gradient-to-r from-pink-500 to-pink-400 text-white ${
-                                message.isWin ? "border-2 border-green-500" : ""
+                            ? `bg-gradient-to-r from-pink-500 to-pink-400 text-white shadow-lg hover:shadow-xl transition-shadow duration-300 ${
+                                message.isWin
+                                  ? "border-2 border-green-500 animate-pulse"
+                                  : ""
                               }`
-                            : "bg-pink-50 text-pink-800 border border-pink-200"
-                        }`}
+                            : "bg-pink-50 text-pink-800 border border-pink-200 hover:border-pink-300 transition-colors duration-300"
+                        } animate-fadeIn hover:scale-[1.02] transition-transform duration-300`}
                       >
                         {message.sender === "ai" && message.isTyping ? (
                           <TypingAnimation
@@ -297,7 +308,9 @@ export default function AthenaChat() {
                           message.content
                         )}
                         {message.isWin && (
-                          <span className="ml-2 text-green-500">🏆</span>
+                          <span className="ml-2 text-green-500 animate-bounce">
+                            🏆
+                          </span>
                         )}
                       </span>
                     </div>
@@ -306,9 +319,10 @@ export default function AthenaChat() {
                 <div ref={messagesEndRef} />
               </ScrollArea>
             </CardContent>
-            <CardFooter className="bg-white/80 border-t border-pink-100">
+
+            <CardFooter className="bg-white/60 border-t border-pink-100 p-4">
               {hasWinningMessage || aiDecision ? (
-                <div className="w-full p-4 text-center bg-gradient-to-r from-pink-500 to-pink-400 text-white rounded-lg">
+                <div className="w-full p-4 text-center bg-gradient-to-r from-pink-500 to-pink-400 text-white rounded-xl animate-fadeIn">
                   <p className="text-lg font-semibold">Our Dance Concludes.</p>
                   <p className="mt-2">
                     Athena is grateful for the brave humans who engaged. We will
@@ -324,13 +338,13 @@ export default function AthenaChat() {
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                    className="border-2 border-pink-200 focus:border-pink-400 focus:ring-pink-400"
+                    className="border-2 border-pink-200 focus:border-pink-400 focus:ring-pink-400 bg-white/60 backdrop-blur-sm transition-all duration-300"
                   />
                   {isConnected ? (
                     <Button
                       disabled={isPending || isLoading}
                       onClick={handleSendMessage}
-                      className="bg-gradient-to-r from-pink-500 to-pink-400 hover:from-pink-600 hover:to-pink-500"
+                      className="bg-gradient-to-r from-pink-500 to-pink-400 hover:from-pink-600 hover:to-pink-500 transition-all duration-300 "
                     >
                       {isPending || isLoading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
