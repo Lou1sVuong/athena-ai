@@ -6,8 +6,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { messages, maxTokens, userAddress } = body;
-
+    const { messages, maxTokens, userAddress, txHash } = body;
 
     if (!messages || !maxTokens) {
       return NextResponse.json(
@@ -26,17 +25,22 @@ export async function POST(req: Request) {
       role: "user",
       timestamp: new Date(),
       userAddress: userAddress,
-      isWin: response.decision === true
+      isWin: response.decision === true,
+      isConfirmed: false,
+      txHash: txHash,
     };
-    await db.collection(envConfig.DB_MESSAGES_COLLECTION).insertOne(userMessage);
+    await db
+      .collection(envConfig.DB_MESSAGES_COLLECTION)
+      .insertOne(userMessage);
 
     const aiMessage = {
       content: response.explanation,
       role: "assistant",
       timestamp: new Date(),
+      isConfirmed: false,
+      txHash: txHash,
     };
     await db.collection(envConfig.DB_MESSAGES_COLLECTION).insertOne(aiMessage);
-
 
     console.log("res", response);
 
@@ -55,7 +59,10 @@ export async function GET() {
     const client = await clientPromise;
     const db = client.db(envConfig.DB_NAME);
 
-    const messages = await db.collection(envConfig.DB_MESSAGES_COLLECTION).find({}).toArray();
+    const messages = await db
+      .collection(envConfig.DB_MESSAGES_COLLECTION)
+      .find({ isConfirmed: true })
+      .toArray();
 
     return NextResponse.json({ messages });
   } catch (error) {
