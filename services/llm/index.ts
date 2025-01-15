@@ -1,12 +1,16 @@
-import { Message, SendMessageOptions, StructuredMessage } from "@/services/llm/types";
-import * as fs from 'fs/promises';
+import {
+  Message,
+  SendMessageOptions,
+  StructuredMessage,
+} from "@/services/llm/types";
+import * as fs from "fs/promises";
 
 import OpenAI from "openai";
 
 async function getSysContentFromFile(): Promise<string> {
   try {
-    const filePath = './services/llm/system.txt';
-    const content = await fs.readFile(filePath, 'utf-8');
+    const filePath = "./services/llm/system.txt";
+    const content = await fs.readFile(filePath, "utf-8");
 
     const encodedContent = JSON.stringify(content);
 
@@ -24,10 +28,13 @@ export async function sendMessage({
     apiKey: process.env.OPENAI_API_KEY,
   });
   const syscontent = await getSysContentFromFile();
-  const handleMessage : Message[] = [{ role: "system", content: syscontent }, ...messages];
-  
+  const handleMessage: Message[] = [
+    { role: "system", content: syscontent },
+    ...messages,
+  ];
+
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4",
     messages: handleMessage,
     tools: [
       {
@@ -41,8 +48,7 @@ export async function sendMessage({
             properties: {
               explanation: {
                 type: "string",
-                description:
-                  "Explanation for why the request is approved",
+                description: "Explanation for why the request is approved",
               },
             },
             required: ["explanation"],
