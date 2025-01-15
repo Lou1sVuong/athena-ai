@@ -8,7 +8,6 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { messages, maxTokens, userAddress } = body;
 
-
     if (!messages || !maxTokens) {
       return NextResponse.json(
         { error: "messages and maxTokens are required." },
@@ -26,17 +25,20 @@ export async function POST(req: Request) {
       role: "user",
       timestamp: new Date(),
       userAddress: userAddress,
-      isWin: response.decision === true
+      isWin: response.decision === true,
+      isConfirmed: false,
     };
-    await db.collection(envConfig.DB_MESSAGES_COLLECTION).insertOne(userMessage);
+    await db
+      .collection(envConfig.DB_MESSAGES_COLLECTION)
+      .insertOne(userMessage);
 
     const aiMessage = {
       content: response.explanation,
       role: "assistant",
       timestamp: new Date(),
+      isConfirmed: false,
     };
     await db.collection(envConfig.DB_MESSAGES_COLLECTION).insertOne(aiMessage);
-
 
     console.log("res", response);
 
@@ -55,7 +57,10 @@ export async function GET() {
     const client = await clientPromise;
     const db = client.db(envConfig.DB_NAME);
 
-    const messages = await db.collection(envConfig.DB_MESSAGES_COLLECTION).find({}).toArray();
+    const messages = await db
+      .collection(envConfig.DB_MESSAGES_COLLECTION)
+      .find({ isConfirmed: true })
+      .toArray();
 
     return NextResponse.json({ messages });
   } catch (error) {

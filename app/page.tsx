@@ -35,6 +35,7 @@ interface Message {
   isTyping?: boolean;
   userAddress?: string;
   isWin?: boolean;
+  isConfirmed?: boolean;
 }
 
 export default function AthenaChat() {
@@ -92,10 +93,43 @@ export default function AthenaChat() {
 
           const data = await response.json();
 
-          setMessages((prev) => [
-            ...prev.slice(0, -1),
-            { sender: "ai", content: data.explanation, isTyping: false },
-          ]);
+          // Update messages to confirmed state
+          const updateConfirmed = await fetch(
+            `${process.env.NEXT_PUBLIC_URL}/api/message/confirm`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userAddress: address,
+                content: inputMessage,
+              }),
+            }
+          );
+
+          if (!updateConfirmed.ok) {
+            console.error("Failed to update confirmed state");
+          }
+
+          // Fetch latest messages after confirmation
+          const fetchMessages = await fetch(
+            `${process.env.NEXT_PUBLIC_URL}/api/message`
+          );
+          if (fetchMessages.ok) {
+            const messagesData = await fetchMessages.json();
+            const formattedMessages = messagesData.messages.map((msg: any) => ({
+              sender: msg.role === "user" ? "user" : "ai",
+              content: msg.content,
+              userAddress: msg.userAddress,
+              isWin: msg.isWin,
+              isConfirmed: msg.isConfirmed,
+            }));
+
+            const hasWin = formattedMessages.some((msg: any) => msg.isWin);
+            setHasWinningMessage(hasWin);
+            setMessages(formattedMessages);
+          }
 
           if (data.decision) {
             setAiDecision(true);
