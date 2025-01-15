@@ -116,7 +116,7 @@ export default function AthenaChat() {
     };
 
     updateMessages();
-  }, [isPendingTxSuccess, pendingTx, address]);
+  }, [isPendingTxSuccess]);
 
   useEffect(() => {
     if (hash) {
