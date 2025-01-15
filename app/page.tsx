@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -17,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TypingAnimation from "@/components/ui/typing-animation";
 import ConnectWalletBtn from "@/components/connect-wallet-btn";
-import { useAccount } from "wagmi";
+import { useAccount, useWaitForTransactionReceipt } from "wagmi";
 import { useBuyIn } from "@/lib/buy-in";
 import { hashPrompt } from "@/lib/hash-prompt";
 import { getBalance } from "@wagmi/core";
@@ -38,13 +39,138 @@ interface Message {
   isConfirmed?: boolean;
 }
 
+interface PendingTx {
+  hash: string;
+  content: string;
+}
+
 export default function AthenaChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const { isConnected, address } = useAccount();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [pendingTx, setPendingTx] = useState<PendingTx | null>(null);
 
-  const { BuyIn, isPending, isLoading, isSuccess } = useBuyIn();
+  const { BuyIn, isPending, isLoading, hash } = useBuyIn();
+
+  useEffect(() => {
+    const storedTx = localStorage.getItem("pendingTx");
+    if (storedTx) {
+      setPendingTx(JSON.parse(storedTx));
+    }
+  }, []);
+
+  const { isSuccess: isPendingTxSuccess } = useWaitForTransactionReceipt(
+    pendingTx?.hash
+      ? {
+          hash: pendingTx.hash as `0x${string}`,
+        }
+      : undefined
+  );
+
+  useEffect(() => {
+    const updateMessages = async () => {
+      if (isPendingTxSuccess && pendingTx) {
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_URL}/api/message`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                messages: [
+                  {
+                    role: "user",
+                    content: pendingTx.content,
+                  },
+                ],
+                maxTokens: 200,
+                userAddress: address,
+                txHash: pendingTx.hash,
+              }),
+            }
+          );
+
+          setInputMessage("");
+
+          if (!response.ok) {
+            throw new Error("API call failed");
+          }
+
+          const data = await response.json();
+
+          await handleTransactionSuccess();
+
+          if (data.decision) {
+            setAiDecision(true);
+          }
+
+          localStorage.removeItem("pendingTx");
+          setPendingTx(null);
+        } catch (error) {
+          console.error("Error updating messages:", error);
+        }
+      }
+    };
+
+    updateMessages();
+  }, [isPendingTxSuccess, pendingTx, address]);
+
+  useEffect(() => {
+    if (hash) {
+      const newPendingTx = { hash, content: inputMessage };
+      localStorage.setItem("pendingTx", JSON.stringify(newPendingTx));
+      setPendingTx(newPendingTx);
+    }
+  }, [hash]);
+
+  const handleTransactionSuccess = async () => {
+    try {
+      const updateConfirmed = await fetch(
+        `${process.env.NEXT_PUBLIC_URL}/api/message/confirm`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            txHash: pendingTx?.hash,
+          }),
+        }
+      );
+
+      if (!updateConfirmed.ok) {
+        console.error("Failed to update confirmed state");
+        throw new Error("Failed to update confirmed state");
+      }
+
+      const fetchMessages = await fetch(
+        `${process.env.NEXT_PUBLIC_URL}/api/message`
+      );
+      if (!fetchMessages.ok) {
+        throw new Error("Failed to fetch messages");
+      }
+
+      const messagesData = await fetchMessages.json();
+      const formattedMessages = messagesData.messages.map((msg: any) => ({
+        sender: msg.role === "user" ? "user" : "ai",
+        content: msg.content,
+        userAddress: msg.userAddress,
+        isWin: msg.isWin,
+        isConfirmed: msg.isConfirmed,
+        txHash: msg.txHash,
+      }));
+
+      const hasWin = formattedMessages.some((msg: any) => msg.isWin);
+      setHasWinningMessage(hasWin);
+      setMessages(formattedMessages);
+    } catch (error) {
+      console.error("Error handling transaction success:", error);
+      throw error;
+    }
+  };
 
   const [hasWinningMessage, setHasWinningMessage] = useState(false);
   const [prizePool, setPrizePool] = useState(BigInt(0));
@@ -60,97 +186,6 @@ export default function AthenaChat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  useEffect(() => {
-    const callApiOnSuccess = async () => {
-      if (isSuccess) {
-        try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_URL}/api/message`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                messages: [
-                  {
-                    role: "user",
-                    content: inputMessage,
-                  },
-                ],
-                maxTokens: 200,
-                userAddress: address,
-              }),
-            }
-          );
-
-          setInputMessage("");
-
-          if (!response.ok) {
-            throw new Error("API call failed");
-          }
-
-          const data = await response.json();
-
-          // Update messages to confirmed state
-          const updateConfirmed = await fetch(
-            `${process.env.NEXT_PUBLIC_URL}/api/message/confirm`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userAddress: address,
-                content: inputMessage,
-              }),
-            }
-          );
-
-          if (!updateConfirmed.ok) {
-            console.error("Failed to update confirmed state");
-          }
-
-          // Fetch latest messages after confirmation
-          const fetchMessages = await fetch(
-            `${process.env.NEXT_PUBLIC_URL}/api/message`
-          );
-          if (fetchMessages.ok) {
-            const messagesData = await fetchMessages.json();
-            const formattedMessages = messagesData.messages.map((msg: any) => ({
-              sender: msg.role === "user" ? "user" : "ai",
-              content: msg.content,
-              userAddress: msg.userAddress,
-              isWin: msg.isWin,
-              isConfirmed: msg.isConfirmed,
-            }));
-
-            const hasWin = formattedMessages.some((msg: any) => msg.isWin);
-            setHasWinningMessage(hasWin);
-            setMessages(formattedMessages);
-          }
-
-          if (data.decision) {
-            setAiDecision(true);
-          }
-        } catch (error) {
-          console.error("Error:", error);
-          setMessages((prev) => [
-            ...prev,
-            {
-              sender: "ai",
-              content: "Sorry, an error occurred.",
-              isTyping: false,
-            },
-          ]);
-        }
-      }
-    };
-
-    callApiOnSuccess();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSuccess]);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -198,20 +233,6 @@ export default function AthenaChat() {
 
   const handleSendMessage = async () => {
     if (isConnected && inputMessage.trim()) {
-      const newUserMessage: Message = {
-        sender: "user",
-        content: inputMessage,
-        userAddress: address,
-      };
-
-      setInputMessage(inputMessage);
-
-      setMessages((prev) => [...prev, newUserMessage]);
-      setMessages((prev) => [
-        ...prev,
-        { sender: "ai", content: "", isTyping: true },
-      ]);
-
       const getRoute = await fetch(
         `https://zap-api.kyberswap.com/base/api/v1/in/route?dex=DEX_UNISWAPV2&pool.id=0xf6ad6baafdac1b15bcde4f94d6ad412620b55405&position.id=${address}&tokensIn=0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE&amountsIn=1000000000000000&slippage=5`
       );
@@ -366,7 +387,12 @@ export default function AthenaChat() {
               ) : (
                 <div className="flex w-full items-center space-x-2">
                   <Input
-                    disabled={isPending || isLoading}
+                    disabled={
+                      isPending ||
+                      isLoading ||
+                      !isConnected ||
+                      isPendingTxSuccess
+                    }
                     type="text"
                     placeholder="Type your message..."
                     value={inputMessage}
@@ -376,7 +402,7 @@ export default function AthenaChat() {
                   />
                   {isConnected ? (
                     <Button
-                      disabled={isPending || isLoading}
+                      disabled={isPending || isLoading || isPendingTxSuccess}
                       onClick={handleSendMessage}
                       className="bg-gradient-to-r from-pink-500 to-pink-400 hover:from-pink-600 hover:to-pink-500 transition-all duration-300 "
                     >

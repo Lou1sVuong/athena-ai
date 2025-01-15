@@ -5,11 +5,11 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { userAddress, content } = body;
+    const { txHash } = body;
 
-    if (!userAddress || !content) {
+    if (!txHash) {
       return NextResponse.json(
-        { error: "userAddress and content are required." },
+        { error: "txHash is required." },
         { status: 400 }
       );
     }
@@ -17,22 +17,10 @@ export async function POST(req: Request) {
     const client = await clientPromise;
     const db = client.db(envConfig.DB_NAME);
 
-    // Update user message
-    await db.collection(envConfig.DB_MESSAGES_COLLECTION).updateOne(
+    // Update all messages with matching txHash
+    await db.collection(envConfig.DB_MESSAGES_COLLECTION).updateMany(
       {
-        userAddress: userAddress,
-        content: content,
-        role: "user",
-        isConfirmed: false,
-      },
-      { $set: { isConfirmed: true } }
-    );
-
-    // Update AI response
-    await db.collection(envConfig.DB_MESSAGES_COLLECTION).updateOne(
-      {
-        content: { $exists: true },
-        role: "assistant",
+        txHash: txHash,
         isConfirmed: false,
       },
       { $set: { isConfirmed: true } }

@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { messages, maxTokens, userAddress } = body;
+    const { messages, maxTokens, userAddress, txHash } = body;
 
     if (!messages || !maxTokens) {
       return NextResponse.json(
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
       userAddress: userAddress,
       isWin: response.decision === true,
       isConfirmed: false,
+      txHash: txHash,
     };
     await db
       .collection(envConfig.DB_MESSAGES_COLLECTION)
@@ -37,6 +38,7 @@ export async function POST(req: Request) {
       role: "assistant",
       timestamp: new Date(),
       isConfirmed: false,
+      txHash: txHash,
     };
     await db.collection(envConfig.DB_MESSAGES_COLLECTION).insertOne(aiMessage);
 
