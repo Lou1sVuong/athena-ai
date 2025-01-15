@@ -6,7 +6,7 @@ import { SC_ADDRESS } from "@/constants/address";
 
 export function useBuyIn() {
   const { data: hash, error, isPending, writeContract } = useWriteContract();
-  const valueInWei = ethers.parseEther("0.0001");
+  const valueInWei = ethers.parseEther("0.001");
 
   async function BuyIn({
     hashedPrompt,
