@@ -1,37 +1,8 @@
 [
   {
     "type": "constructor",
-    "inputs": [
-      {
-        "name": "feeRecipientAddress",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "feePerc_",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "_paymentToken",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "_router",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
+    "inputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "fallback",
-    "stateMutability": "payable"
-  },
-  {
-    "type": "receive",
-    "stateMutability": "payable"
   },
   {
     "type": "function",
@@ -43,12 +14,22 @@
         "internalType": "bytes32"
       },
       {
-        "name": "callbackData",
+        "name": "routerAddress",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "callData",
         "type": "bytes",
         "internalType": "bytes"
       },
       {
-        "name": "routerAddress",
+        "name": "feeWallet",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "multisigWallet",
         "type": "address",
         "internalType": "address"
       }
@@ -58,81 +39,16 @@
   },
   {
     "type": "function",
-    "name": "paymentToken",
+    "name": "operator",
     "inputs": [],
     "outputs": [
       {
         "name": "",
         "type": "address",
-        "internalType": "contract IERC20"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "router",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "contract IRouter"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "setFee",
-    "inputs": [
-      {
-        "name": "feePerc_",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "setFeeRecipient",
-    "inputs": [
-      {
-        "name": "feeRecipientAddress",
-        "type": "address",
         "internalType": "address"
       }
     ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "setOperator",
-    "inputs": [
-      {
-        "name": "operator_",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "withdrawToken",
-    "inputs": [
-      {
-        "name": "amount",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
+    "stateMutability": "view"
   },
   {
     "type": "event",
@@ -151,16 +67,10 @@
         "internalType": "bytes32"
       },
       {
-        "name": "fee",
+        "name": "amount",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
-      },
-      {
-        "name": "callbackData",
-        "type": "bytes",
-        "indexed": false,
-        "internalType": "bytes"
       }
     ],
     "anonymous": false

@@ -1,3 +1,11 @@
-export const SC_ADDRESS = "0x69397Dce117DB8646845651b5b50c2e95251C509";
+export const SC_ADDRESS = process.env
+  .NEXT_PUBLIC_SMART_CONTRACT_ADDRESS as `0x${string}`;
 
-export const WALLET_POOL_ADDRESS = "0x3FC63e85d9f0Df81cC39B812665B3B32331ab635";
+export const WALLET_POOL_ADDRESS = process.env
+  .NEXT_PUBLIC_WALLET_POOL_ADDRESS as `0x${string}`;
+
+export const CREATOR_ADDRESS = process.env
+  .NEXT_PUBLIC_CREATOR_ADDRESS as `0x${string}`;
+
+export const MULTISIG_WALLET_ADDRESS = process.env
+  .NEXT_PUBLIC_MULTISIG_WALLET_ADDRESS as `0x${string}`;

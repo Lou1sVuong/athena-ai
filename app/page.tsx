@@ -234,7 +234,7 @@ export default function AthenaChat() {
   const handleSendMessage = async () => {
     if (isConnected && inputMessage.trim()) {
       const getRoute = await fetch(
-        `https://zap-api.kyberswap.com/base/api/v1/in/route?dex=DEX_UNISWAPV2&pool.id=0xf6ad6baafdac1b15bcde4f94d6ad412620b55405&position.id=${address}&tokensIn=0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE&amountsIn=1000000000000000&slippage=5`
+        `https://zap-api.kyberswap.com/base/api/v1/in/route?dex=DEX_UNISWAPV2&pool.id=0xf6ad6baafdac1b15bcde4f94d6ad412620b55405&position.id=${address}&tokensIn=0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE&amountsIn=100000&slippage=5`
       );
       if (!getRoute.ok) {
         throw new Error("Failed to fetch Route");
@@ -260,7 +260,7 @@ export default function AthenaChat() {
       const { data: buildRouteData } = await buildRoute.json();
       BuyIn({
         hashedPrompt: hashPrompt(inputMessage),
-        callbackData: buildRouteData.callData,
+        callData: buildRouteData.callData,
         routerAddress: buildRouteData.routerAddress,
       });
     }
