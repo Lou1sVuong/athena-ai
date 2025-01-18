@@ -1,78 +1,99 @@
 [
   {
-    "type": "constructor",
-    "inputs": [],
-    "stateMutability": "nonpayable"
+      "type": "constructor",
+      "inputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    "type": "function",
-    "name": "buyIn",
-    "inputs": [
-      {
-        "name": "hashedPrompt",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      },
-      {
-        "name": "routerAddress",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "callData",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "feeWallet",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "multisigWallet",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "payable"
+      "type": "fallback",
+      "stateMutability": "payable"
   },
   {
-    "type": "function",
-    "name": "operator",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "stateMutability": "view"
+      "type": "receive",
+      "stateMutability": "payable"
   },
   {
-    "type": "event",
-    "name": "BuyIn",
-    "inputs": [
-      {
-        "name": "user",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "hashedPrompt",
-        "type": "bytes32",
-        "indexed": false,
-        "internalType": "bytes32"
-      },
-      {
-        "name": "amount",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
+      "type": "function",
+      "name": "buyIn",
+      "inputs": [
+          {
+              "name": "hashedPrompt",
+              "type": "bytes32",
+              "internalType": "bytes32"
+          },
+          {
+              "name": "routerAddress",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "callData",
+              "type": "bytes",
+              "internalType": "bytes"
+          },
+          {
+              "name": "feeWallet",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "multisWallet",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "payable"
+  },
+  {
+      "type": "function",
+      "name": "operator",
+      "inputs": [],
+      "outputs": [
+          {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "stateMutability": "view"
+  },
+  {
+      "type": "function",
+      "name": "setOperator",
+      "inputs": [
+          {
+              "name": "newOperator",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+  },
+  {
+      "type": "event",
+      "name": "BuyIn",
+      "inputs": [
+          {
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "hashedPrompt",
+              "type": "bytes32",
+              "indexed": false,
+              "internalType": "bytes32"
+          },
+          {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          }
+      ],
+      "anonymous": false
   }
 ]
